@@ -1,18 +1,21 @@
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
+var mdns = require('mdns');
 var manager = require('./deviceconnect-manager');
 var config = require('./config');
 
 if (config.http.enabled === true) {
     http.createServer(manager).listen(config.http.port);
+    mdns.createAdvertisement(mdns.tcp('http'), config.http.port, {
+        name: 'DeviceConnectManager for Node.js'
+    }).start();
 }
 if (config.https.enabled === true) {
     https.createServer({
       cert: fs.readFileSync(config.https.certificate),
       key: fs.readFileSync(config.https.privateKey)
     }, manager).listen(config.https.port);
-    
 }
 
 if (config.http.enabled === true || config.https.enabled === true) {
